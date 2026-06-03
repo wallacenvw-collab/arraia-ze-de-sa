@@ -184,6 +184,15 @@ table.gtbl{width:100%;border-collapse:collapse;font-size:12px;min-width:540px;}
 .total-item.pago{color:#2a9d8f;font-size:16px;}
 .del-btn{background:linear-gradient(135deg,#C0392B,#E74C3C);color:#fff;border:none;border-radius:8px;padding:9px;font-size:13px;cursor:pointer;width:100%;margin-top:12px;font-family:'Nunito',sans-serif;font-weight:700;}
 
+/* Vagas */
+.vagas-bar{background:linear-gradient(135deg,#264653,#2a5a6b);color:#fff;text-align:center;padding:10px 16px;font-size:14px;font-weight:700;}
+.vagas-bar span{color:#FFD700;}
+.vagas-criticas{background:linear-gradient(135deg,#C0392B,#E74C3C);}
+.esgotado-box{background:linear-gradient(135deg,#1a0500,#2d0800);color:#FFF8DC;text-align:center;padding:40px 20px;border-radius:16px;margin:1rem;}
+.esgotado-icon{font-size:52px;margin-bottom:12px;}
+.esgotado-title{font-family:'Boogaloo',cursive;font-size:28px;color:#FFD700;margin-bottom:8px;}
+.esgotado-sub{font-size:15px;color:#FFE4B5;line-height:1.6;}
+
 /* Footer */
 footer{background:linear-gradient(135deg,#1a0500,#2d0800);color:#FFE4B5;text-align:center;padding:24px 16px;font-size:13px;line-height:1.8;}
 footer strong{color:#FFD700;}
@@ -226,6 +235,8 @@ footer strong{color:#FFD700;}
   <strong>⚠️ Evento não aberto ao público</strong> — Para participar, é necessário ser indicado por um convidado.
 </div>
 
+<div class="vagas-bar" id="vagas-bar">🎟️ Verificando vagas disponíveis...</div>
+
 <div class="divider"></div>
 
 <div class="section">
@@ -257,7 +268,14 @@ footer strong{color:#FFD700;}
 <!-- FORMULÁRIO -->
 <div class="section">
   <div class="sec-title">🤠 Confirmar presença</div>
-  <div class="form-box">
+  <div id="esgotado-section" style="display:none;">
+    <div class="esgotado-box">
+      <div class="esgotado-icon">😢</div>
+      <div class="esgotado-title">Vagas Esgotadas!</div>
+      <div class="esgotado-sub">Todas as 160 vagas já foram preenchidas.<br>Infelizmente não será possível realizar novas confirmações.<br><br>Agradecemos o interesse e esperamos contar com vocês no próximo! 🤠🌽</div>
+    </div>
+  </div>
+  <div class="form-box" id="form-box">
     <div id="form-area">
 
       <div class="form-section-label">👤 Seus dados</div>
@@ -513,6 +531,31 @@ function adminLogin(){
   }else{document.getElementById("admin-err").style.display="block";}
 }
 
+function checkVagas(){
+  fetch(SCRIPT_URL+"?t="+Date.now())
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.status==="ok"){
+        const bar=document.getElementById("vagas-bar");
+        const v=res.vagasRestantes;
+        if(res.esgotado||v===0){
+          bar.textContent="❌ Vagas esgotadas! Todas as 160 vagas foram preenchidas.";
+          bar.classList.add("vagas-criticas");
+          document.getElementById("form-box").style.display="none";
+          document.getElementById("esgotado-section").style.display="block";
+        } else if(v<=20){
+          bar.innerHTML=`⚠️ Atenção! Restam apenas <span>${v} vagas</span>!`;
+          bar.classList.add("vagas-criticas");
+        } else {
+          bar.innerHTML=`🎟️ <span>${v} vagas</span> disponíveis de 160`;
+        }
+      }
+    })
+    .catch(()=>{
+      document.getElementById("vagas-bar").textContent="🎟️ 160 vagas disponíveis";
+    });
+}
+
 function loadAndRender(){
   document.getElementById("guest-list").style.display="block";
   document.getElementById("guest-tbody").innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:#888;">⏳ Carregando...</td></tr>';
@@ -621,6 +664,9 @@ function renderGuests(gs){
 function clearList(){
   alert("Para limpar a lista, acesse diretamente a planilha do Google Sheets.");
 }
+
+// Verificar vagas ao carregar a página
+checkVagas();
 </script>
 </body>
 </html>
