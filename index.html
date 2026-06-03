@@ -535,10 +535,10 @@ function checkVagas(){
   fetch(SCRIPT_URL+"?t="+Date.now())
     .then(r=>r.json())
     .then(res=>{
+      const bar=document.getElementById("vagas-bar");
       if(res.status==="ok"){
-        const bar=document.getElementById("vagas-bar");
-        const v=res.vagasRestantes;
-        if(res.esgotado||v===0){
+        const v = (typeof res.vagasRestantes !== "undefined") ? parseInt(res.vagasRestantes) : 160;
+        if(res.esgotado || v===0){
           bar.textContent="❌ Vagas esgotadas! Todas as 160 vagas foram preenchidas.";
           bar.classList.add("vagas-criticas");
           document.getElementById("form-box").style.display="none";
@@ -549,10 +549,12 @@ function checkVagas(){
         } else {
           bar.innerHTML=`🎟️ <span>${v} vagas</span> disponíveis de 160`;
         }
+      } else {
+        bar.innerHTML="🎟️ <span>160 vagas</span> disponíveis de 160";
       }
     })
     .catch(()=>{
-      document.getElementById("vagas-bar").textContent="🎟️ 160 vagas disponíveis";
+      document.getElementById("vagas-bar").innerHTML="🎟️ <span>160 vagas</span> disponíveis de 160";
     });
 }
 
